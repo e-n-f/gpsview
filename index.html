@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPS View</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="map"></div>
+
+<div id="panel" class="maplibregl-ctrl">
+  <header>
+    <h1>GPS View</h1>
+    <button id="collapse" type="button" title="Collapse panel" aria-label="Collapse panel">–</button>
+  </header>
+  <div id="panel-body">
+    <p id="hint">Drag GPX files onto the map, or <label class="link">choose files<input id="file-input" type="file" accept=".gpx,application/gpx+xml" multiple hidden></label>.</p>
+
+    <fieldset>
+      <legend>Date range <span class="muted">(local)</span></legend>
+      <div class="row">
+        <input id="date-start" type="date" aria-label="Start date">
+        <span>to</span>
+        <input id="date-end" type="date" aria-label="End date">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Time of day <span class="muted">(local, any date)</span></legend>
+      <div class="row">
+        <input id="time-start" type="time" value="00:00" aria-label="Start time">
+        <span>to</span>
+        <input id="time-end" type="time" value="23:59" aria-label="End time">
+      </div>
+      <p class="muted small">A start later than the end wraps past midnight.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Speed <span class="muted">(mph)</span></legend>
+      <div class="row">
+        <input id="speed-min" type="number" min="0" step="any" value="0" aria-label="Minimum speed">
+        <span>to</span>
+        <input id="speed-max" type="number" min="0" step="any" placeholder="no limit" aria-label="Maximum speed">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Simplification <span class="muted">(feet)</span></legend>
+      <div class="row">
+        <input id="simplify-range" type="range" min="0" max="500" step="1" value="0" aria-label="Simplification tolerance slider">
+        <input id="simplify" type="number" min="0" step="any" value="0" aria-label="Simplification tolerance in feet">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Base map</legend>
+      <select id="basemap" aria-label="Base map"></select>
+    </fieldset>
+
+    <div class="row buttons">
+      <button id="reset" type="button">Reset filters</button>
+      <button id="fit" type="button">Zoom to tracks</button>
+      <button id="clear" type="button">Clear tracks</button>
+    </div>
+
+    <p id="stats" class="muted small"></p>
+  </div>
+</div>
+
+<div id="drop-overlay"><div>Drop GPX files to add them</div></div>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
