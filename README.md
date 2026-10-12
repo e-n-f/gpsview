@@ -19,12 +19,19 @@ All filters apply to every loaded track and update the map immediately.
 - **Speed (mph):** computed for each pair of consecutive points from the
   great-circle distance and the timestamps. Leave the maximum empty for no
   limit.
+- **Longest jump (miles):** breaks the line between consecutive points that are
+  farther apart than this, so gaps in recording don't draw straight lines across
+  the map. Leave it empty for no limit.
 - **Simplification (feet):** Douglas-Peucker tolerance applied to each line after
   filtering. 0 draws every point.
 
-A line is broken wherever a point falls outside the date or time window or a
-pair of points falls outside the speed range. Click a line to see its name, time
+A line is broken wherever a point falls outside the date or time window, or a
+pair of points falls outside the speed range or is farther apart than the
+longest jump. Click a line to see its name, time
 span and distance.
+
+**Line width** sets the track thickness in pixels; thinner lines help in dense
+areas. It is remembered in the browser and is not affected by "Reset filters".
 
 ## Base maps
 

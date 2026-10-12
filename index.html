@@ -48,10 +48,26 @@
     </fieldset>
 
     <fieldset>
+      <legend>Longest jump <span class="muted">(miles)</span></legend>
+      <div class="row">
+        <input id="max-jump" type="number" min="0" step="any" placeholder="no limit" aria-label="Longest jump between points in miles">
+      </div>
+      <p class="muted small">Breaks the line between points farther apart than this.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>Simplification <span class="muted">(feet)</span></legend>
       <div class="row">
         <input id="simplify-range" type="range" min="0" max="500" step="1" value="0" aria-label="Simplification tolerance slider">
         <input id="simplify" type="number" min="0" step="any" value="0" aria-label="Simplification tolerance in feet">
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Line width <span class="muted">(pixels)</span></legend>
+      <div class="row">
+        <input id="line-width-range" type="range" min="0.5" max="10" step="0.5" value="3" aria-label="Line width slider">
+        <input id="line-width" type="number" min="0.1" step="any" value="3" aria-label="Line width in pixels">
       </div>
     </fieldset>
 
