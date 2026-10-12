@@ -51,8 +51,8 @@ fieldset { border: none; margin: 10px 0 0; padding: 0; min-width: 0; }
 legend { font-weight: 600; padding: 0; margin-bottom: 4px; }
 .row { display: flex; align-items: center; gap: 6px; }
 .row input[type="date"], .row input[type="time"], .row input[type="number"] { flex: 1 1 0; min-width: 0; width: 0; }
-#simplify-range { flex: 1 1 auto; min-width: 0; }
-#simplify { flex: 0 0 64px; }
+#simplify-range, #line-width-range { flex: 1 1 auto; min-width: 0; }
+#simplify, #line-width { flex: 0 0 64px; }
 .buttons { flex-wrap: wrap; margin-top: 12px; }
 
 input, select, button {

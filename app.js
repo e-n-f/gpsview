@@ -237,6 +237,9 @@ const ui = {
   timeEnd: $('time-end'),
   speedMin: $('speed-min'),
   speedMax: $('speed-max'),
+  maxJump: $('max-jump'),
+  lineWidth: $('line-width'),
+  lineWidthRange: $('line-width-range'),
   simplify: $('simplify'),
   simplifyRange: $('simplify-range'),
   basemap: $('basemap'),
@@ -300,6 +303,9 @@ function readFilters() {
   f.speedMax = smax ?? Infinity;
   f.speedActive = f.speedMin > 0 || f.speedMax < Infinity;
 
+  const jump = readNumber(ui.maxJump);
+  f.maxJumpM = jump === null ? Infinity : jump * METERS_PER_MILE;
+
   f.toleranceM = Math.max(0, readNumber(ui.simplify) ?? 0) * METERS_PER_FOOT;
   return f;
 }
@@ -320,6 +326,7 @@ function pointPasses(seg, i, f) {
 }
 
 function pairPasses(seg, i, f) {
+  if (seg.dist[i] > f.maxJumpM) return false;
   if (!f.speedActive) return true;
   const s = seg.speed[i];
   if (Number.isNaN(s)) return false;
@@ -362,7 +369,7 @@ function computeFeatures() {
 
     // A line continues through each consecutive pair of points where both
     // points pass the date and time filters and the pair passes the speed
-    // filter; anything else breaks it.
+    // and jump distance filters; anything else breaks it.
     let prevOk = pointPasses(seg, 0, f);
     for (let i = 0; i < seg.n - 1; i++) {
       const nextOk = pointPasses(seg, i + 1, f);
@@ -400,6 +407,12 @@ for (const [key, b] of Object.entries(BASEMAPS)) {
 }
 ui.basemap.value = initialBasemap;
 
+const savedLineWidth = parseFloat(storageGet('gpsview.lineWidth'));
+if (savedLineWidth > 0) {
+  ui.lineWidth.value = String(savedLineWidth);
+  ui.lineWidthRange.value = String(Math.min(savedLineWidth, +ui.lineWidthRange.max));
+}
+
 const map = new maplibregl.Map({
   container: 'map',
   style: BASEMAPS[initialBasemap].style,
@@ -410,11 +423,31 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.NavigationControl(), 'top-right');
 map.addControl(new maplibregl.ScaleControl({ unit: 'imperial' }), 'bottom-right');
 
+const DEFAULT_LINE_WIDTH = 3;
+
+function lineWidth() {
+  const v = readNumber(ui.lineWidth);
+  return v !== null && v > 0 ? v : DEFAULT_LINE_WIDTH;
+}
+
+// The white casing adds up to a pixel on each side, less for thin lines so it
+// doesn't swamp them in dense areas.
+function casingWidth(w) {
+  return w + Math.min(2, w);
+}
+
+function applyLineWidth() {
+  const w = lineWidth();
+  storageSet('gpsview.lineWidth', String(w));
+  if (map.getLayer('tracks')) map.setPaintProperty('tracks', 'line-width', w);
+  if (map.getLayer('tracks-casing')) map.setPaintProperty('tracks-casing', 'line-width', casingWidth(w));
+}
+
 function ensureTrackLayers() {
   if (!map.getSource('tracks')) {
     map.addSource('tracks', { type: 'geojson', data: state.geojson });
   }
-  const width = ['interpolate', ['linear'], ['zoom'], 4, 1.5, 12, 3, 17, 5];
+  const width = lineWidth();
   if (!map.getLayer('tracks-casing')) {
     map.addLayer({
       id: 'tracks-casing',
@@ -424,7 +457,7 @@ function ensureTrackLayers() {
       paint: {
         'line-color': '#ffffff',
         'line-opacity': 0.8,
-        'line-width': ['interpolate', ['linear'], ['zoom'], 4, 3, 12, 5, 17, 8],
+        'line-width': casingWidth(width),
       },
     });
   }
@@ -590,6 +623,7 @@ function resetFilters() {
   ui.timeEnd.value = '23:59';
   ui.speedMin.value = '0';
   ui.speedMax.value = '';
+  ui.maxJump.value = '';
   ui.simplify.value = ui.simplifyRange.value = '0';
   update();
 }
@@ -602,7 +636,7 @@ for (const input of [ui.dateStart, ui.dateEnd]) {
   input.addEventListener('input', () => { state.datesTouched = true; scheduleUpdate(); });
   input.addEventListener('change', () => { state.datesTouched = true; scheduleUpdate(); });
 }
-for (const input of [ui.timeStart, ui.timeEnd, ui.speedMin, ui.speedMax]) {
+for (const input of [ui.timeStart, ui.timeEnd, ui.speedMin, ui.speedMax, ui.maxJump]) {
   input.addEventListener('input', scheduleUpdate);
   input.addEventListener('change', scheduleUpdate);
 }
@@ -614,6 +648,16 @@ ui.simplify.addEventListener('input', () => {
   const v = readNumber(ui.simplify);
   if (v !== null) ui.simplifyRange.value = String(Math.min(v, +ui.simplifyRange.max));
   scheduleUpdate();
+});
+
+ui.lineWidthRange.addEventListener('input', () => {
+  ui.lineWidth.value = ui.lineWidthRange.value;
+  applyLineWidth();
+});
+ui.lineWidth.addEventListener('input', () => {
+  const v = readNumber(ui.lineWidth);
+  if (v !== null) ui.lineWidthRange.value = String(Math.min(v, +ui.lineWidthRange.max));
+  applyLineWidth();
 });
 
 $('reset').addEventListener('click', resetFilters);
